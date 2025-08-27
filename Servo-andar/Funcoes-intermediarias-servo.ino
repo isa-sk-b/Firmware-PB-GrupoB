@@ -1,0 +1,35 @@
+// Arquivo com as funcoes parciais para definir o andar do robo com os Servomotores
+// Incrementos das posicoes dos Servos
+int posDIR = 0; 
+int incrementoDIR = +1; 
+int posESQ = 180; 
+int incrementoESQ = +1; 
+int posQUADRIL = 0;
+int incrementoQUADRIL = +1; 
+
+void functeste() { // Funcionando! 
+    if(posDIR>180 || posDIR<0) incrementoDIR = -incrementoDIR; 
+    if(posQUADRIL>180 || posQUADRIL<0) incrementoQUADRIL = -incrementoQUADRIL; 
+    if(posESQ<0 || posESQ>180) incrementoESQ =- incrementoESQ;
+    posDIR += incrementoDIR; 
+    posESQ += incrementoESQ;
+    posQUADRIL += incrementoQUADRIL;
+    servoquadril.write(posQUADRIL); 
+    servodir.write(posDIR);
+    servoesq.write(posESQ); 
+    delay(10); // Variacao minima de angulo, logo nao precisa parar o codigo por tanto tempo 
+}
+
+void teste_basico() { // Funcionando!
+  servodir.write(0);
+  servoesq.write(180);
+  delay(2000);
+  servodir.write(90);
+  servoesq.write(90);
+  delay(2000); 
+  servodir.write(180);
+  servoesq.write(0);
+  delay(2000);
+}
+
+
