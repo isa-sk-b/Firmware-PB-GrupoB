@@ -20,7 +20,7 @@
 // Declaracao dos servomotores (objeto); 
 Servo pe_dir;
 Servo pe_esq;
-Servo quadril_dir; // VERIFICAR SE VAI USAR MESMO TRES SERVOS PARA O QUADRIL OU SE SO UM JA BASTA 
+Servo quadril_dir; // VERIFICAR SE VAI USAR MESMO DOIS SERVOS PARA O QUADRIL OU SE SO UM JA BASTA 
 Servo quadril_esq;
 Servo quadril; 
 
@@ -43,8 +43,12 @@ void setup() {
   // Anexar os servomotores aos pinos
   pe_dir.attach(pinDIR); 
   pe_esq.attach(pinESQ); 
-  quadril_dir.attach(pinQUADRIL_DIR); // Verificar se precisa de dois servomotores ou se daria para fazer com apenas um 
+
+  //Dois servomotores 
+  quadril_dir.attach(pinQUADRIL_DIR);
   quadril_esq.attach(pinQUADRIL_ESQ); 
+
+  // Um servomotor
   quadril.attach(pinQUADRIL); 
   // Verificar quais posicoes dos servomotores correspondem ao 0 (Permite determinar a faixa dos angulos possiveis do servomotor)
   //    > > > > >                     depois setar essa parte para valores 0 para verificar qual o angulo que o servomotor precisa ficar parado para atingir os angulos que precisamos
