@@ -30,16 +30,16 @@ void setup()
   servodir.attach(pinDIR); 
   servoesq.attach(pinESQ);
   servo_quadril_DIR.attach(pin_garra_DIR);
-  servo_quadril_ESQ.attach(pin_garra_ESQ); 
+  servo_quadril_ESQ.attach(pin_garra_ESQ);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(ledRGB1, OUTPUT);
-  pinMode(ledRGB2, OUTPUT); 
+  pinMode(ledRGB2, OUTPUT);
   //pinMode(ldr_sensor, INPUT);
 }
 
 // Funcao para teste de servo -> Gera delay de 3 segundos apos a execucao
-void teste_servo() {      // Funcionando!
+void teste_servo() {            // Funcionando!
   servodir.write(0);
   servoesq.write(0);
   servo_quadril_DIR.write(0);
@@ -57,11 +57,11 @@ void teste_servo() {      // Funcionando!
 
 
 // Funcao para teste do Sensor Ultrassonico -> Gera delay de ??? segundos
-int ultrassonico() {      // A verificar...
+int teste_ultrassonico() {      // A verificar...
   digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
+  delay(2);
   digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10); 
+  delay(10); 
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH); 
   distance = (duration*.0343)/2; 
@@ -73,50 +73,18 @@ int ultrassonico() {      // A verificar...
 // Pode fazer isso no main tambem (mais facil)
 
 
-// Funcao para teste do Led RGB 
-void ledRGB() {
-    int  ldrStatus = analogRead(ldr_sensor);  
-    if (ldrStatus <=80) {
-      digitalWrite(ledRGB1,  HIGH);         
-  }
-    else {
-digitalWrite(ledRGB1,  LOW);          
-  }
+// Funcao para teste do modulo Led RGB 
+void teste_led() {
+
+
+
+    // Programacao do led em cascata -> possui dois modulos de led          
 }
-// 
 
 
+// VOID LOOP 
 void loop() {
   if(teste_ultrassonico()>10)  { teste_servo(); }       // Caso a distancia seja maior que n centimetros, movimenta o servomotor. 
-  //else { desvio_objetos(); }                     
-  ledRGB();
-  if(true) {teste_basico();} // Se a distancia for maior que 8cm, andar com o servo. 
-}
-
-
-
-void setup() {
-  //Defining the pins as OUTPUT
-  pinMode(redPin,  OUTPUT);              
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
-}
-void  loop() {
-  setColor(255, 0, 0); // Red Color
-  delay(1000);
-  setColor(0,  255, 0); // Green Color
-  delay(1000);
-  setColor(0, 0, 255); // Blue Color
-  delay(1000);
-  setColor(255, 255, 255); // White Color
-  delay(1000);
-  setColor(170, 0, 255); // Purple Color
-  delay(1000);
-  setColor(127, 127,  127); // Light Blue
-  delay(1000);
-}
-void setColor(int redValue, int greenValue,  int blueValue) {
-  analogWrite(redPin, redValue);
-  analogWrite(greenPin,  greenValue);
-  analogWrite(bluePin, blueValue);
+  //else { desvio_objetos(); }                          // Caso a distancia seja menor (identificacao de obstaculo), verificar qual distancia o motor pode andar
+  teste_led();
 }
