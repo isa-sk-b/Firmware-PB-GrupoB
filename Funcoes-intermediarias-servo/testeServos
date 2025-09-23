@@ -1,0 +1,91 @@
+#include <ESP32Servo.h>
+#define SERVO1 5
+#define SERVO2 18
+#define SERVO3 19
+#define SERVO4 21
+#define SERVO5 22
+#define SERVO6 23
+
+
+Servo s1;
+Servo s2;
+Servo s3;
+Servo s4;
+Servo s5;
+Servo s6;
+int pos;
+
+void setup(){
+  s1.attach(SERVO1);
+  s2.attach(SERVO2);
+  s3.attach(SERVO3);
+  s4.attach(SERVO4);
+  s5.attach(SERVO5);
+  s6.attach(SERVO6);
+  Serial.begin(9600);
+  s1.write(0);
+  s2.write(0);
+}
+
+void loop() {
+  for(pos=0;pos<180;pos++){
+    s1.write(pos);
+    delay(2);
+  }
+  delay(1000);
+  for(pos=180;pos>=180;pos--){
+    s1.write(pos);
+    delay(10);
+  }
+
+  for(pos=0;pos<180;pos++){
+    s2.write(pos);
+    delay(2);
+  }
+  delay(1000);
+  for(pos=180;pos>=180;pos--){
+    s2.write(pos);
+    delay(10);
+  }
+
+  for(pos=0;pos<180;pos++){
+    s3.write(pos);
+    delay(2);
+  }
+  delay(1000);
+  for(pos=180;pos>=180;pos--){
+    s3.write(pos);
+    delay(10);
+  }
+
+  for(pos=0;pos<180;pos++){
+    s4.write(pos);
+    delay(2);
+  }
+  delay(1000);
+  for(pos=180;pos>=180;pos--){
+    s4.write(pos);
+    delay(10);
+  }
+
+  for(pos=0;pos<180;pos++){
+    s5.write(pos);
+    delay(2);
+  }
+  delay(1000);
+  for(pos=180;pos>=180;pos--){
+    s5.write(pos);
+    delay(10);
+  }
+
+  for(pos=0;pos<180;pos++){
+    s6.write(pos);
+    delay(2);
+  }
+  delay(1000);
+  for(pos=180;pos>=180;pos--){
+    s6.write(pos);
+    delay(10);
+  }
+
+}
