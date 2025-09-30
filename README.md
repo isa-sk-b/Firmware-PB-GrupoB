@@ -1,2 +1,3 @@
-Códigos para as rotinas do robô bípede do Grupo B, área Firmware. 
-Projeto de Bixos NRE SEMEAR 2025.
+Este repositório contém os códigos, em C++, utilizados pelo robô Sirigueijo, da área Firmware.  
+Grupo B -  
+Projeto de Bixos NRE SEMEAR 2025.  
