@@ -5,10 +5,14 @@
 #define pinDIRPE            18      // Pino funcionando!
 #define pinESQPE            19      // Pino funcionando!
 #define pinDIRQUAD          -1
-#define pinESQQUAD          -1
+#define pinESQQUAD          -1   
+#define pinDIRGARRA         -1
+#define pinESQGARRA         -1
 #define ESQUERDA            1
 #define DIREITA             0
 
+
+// OBS: CUIDADO COM PROPAGACAO DOS DELAYS NAS FUNCOES!!      
 
 // PARAMETROS DE CONTROLE PARA REGULAR O ANDAR DOS SERVOMOTORES 
 // Definicao de constantes para ambos os servomotores 
@@ -17,6 +21,7 @@ int qtde_variacoes = 3;             // Regula quao brusca e a variacao dos angul
 
 
 // Relacionados aos angulos dos servomotores  
+// O angulo parado precisa ser, no minimo, 
 // QUADRIS  
 int angulo_parado_quadril = 22.5;   // O angulo em que o quadril deve ficar em repouso (angulo de referencia) deve estar no meio dos angulos maximos e minimos  
 int diferenca_Quad = 45;            // Faixa de angulos varrida (a distancia angular entre as posicoes das extremidades do servomotor)
@@ -64,7 +69,7 @@ void dar_passo(int passo) {
                 i++; 
         }
         
-            servo_quadril[ESQUERDA].write(); 
+            /*servo_quadril[ESQUERDA].write(); 
             servo_pe[ESQUERDA].write();
             delay(intervalo_servo);
             servo_quadril[ESQUERDA].write(45); 
@@ -72,7 +77,7 @@ void dar_passo(int passo) {
             delay(intervalo_servo);
             servo_quadril[ESQUERDA].write();
             servo_pe[ESQUERDA].write();
-            i++; 
+            i++;*/
     } 
     else (passo==DIREITA) {
         servo_quadril[DIREITA].write(90); 
@@ -87,7 +92,7 @@ void dar_passo(int passo) {
 }
 
 
-// Deteccao da distancia em relacao ao serv
+// Deteccao da distancia em relacao a um obstaculo do robo
 int distancia() {
 
 }
