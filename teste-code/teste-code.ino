@@ -1,21 +1,23 @@
 // Arquivo com as funcoes parciais para verificar os pinos usados 
 //Inclusao das bibliotecas 
 #include <ESP32Servo.h>
+#include <Adafruit_NeoPixel.h>
 // Pinos dos servos
 #define pinDIR          18      // Pino funcionando!
 #define pinESQ          19      // Pino funcionando!
 #define pin_quadril_DIR 21      // Pino funcionando! 
-#define pin_quadril_ESQ 33      // Pino funcionando!
-#define pin_garra_DIR   32      // Pino funcionando!
-#define pin_garra_ESQ   22      // Pino funcionando!
+#define pin_quadril_ESQ 22      // Pino funcionando!
+#define pin_garra_DIR   23      // Pino funcionando!
+#define pin_garra_ESQ   33      // Pino funcionando! 
 // Pinos do ultrassonico 
-#define trigPin         2
-#define echoPin         4
+#define echoPin         27          
+#define trigPin         26 
 // Pinos para iluminacao 
-#define ldr_sensor      26
-#define redPin1          5
-#define greenPin1        6
-#define bluePin1         7 
+#define LED_PIN1        13      // Pino funcionando! 
+#define LED_PIN2        14      // Pino funcionando! 
+#define ldr_sensor      25
+// Numero de LEDs WS2812B conectados a ESP  
+#define LED_COUNT       8
 
 // Declaracao dos servomotores dos pes
 Servo servodir;
@@ -26,7 +28,12 @@ Servo servo_garra_DIR;
 Servo servo_garra_ESQ; 
 int tmp = 2000; 
 
+// Declaracao de variaveis para modulo LED
+Adafruit_NeoPixel strip1(LED_COUNT, LED_PIN1, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip2(LED_COUNT, LED_PIN2, NEO_GRB + NEO_KHZ800);
+
 int valor_ldr;
+float duration,distance; 
 
 void setup()
 {
@@ -41,6 +48,11 @@ void setup()
   pinMode(ldr_sensor,INPUT);
   pinMode(ldr_sensor, INPUT);
   Serial.begin(9600);
+
+  strip1.begin();           // Initialize NeoPixel object
+  strip1.setBrightness(10); // Set BRIGHTNESS to about 4% (max = 255)
+  strip2.begin(); 
+  strip2.setBrightness(10);
 }
 
 // Funcao para teste de servo -> Gera delay de 3 segundos apos a execucao
@@ -80,29 +92,45 @@ void teste_servo() {            // Funcionando!
 }
 
 // Funcao para teste do Sensor Ultrassonico -> Gera delay de ??? segundos
-int teste_ultrassonico() {      // A verificar...
+void teste_ultrassonico() {      // A verificar...
   digitalWrite(trigPin, LOW);
   delay(2);
   digitalWrite(trigPin, HIGH);
   delay(10); 
   digitalWrite(trigPin, LOW);
-  int duration = pulseIn(echoPin, HIGH); 
-  int distance = (duration*.0343)/2; 
+  duration = pulseIn(echoPin, HIGH); 
+  distance = (duration*.0343)/2; 
   delay(100);                           
-  Serial.print("Distancia: "); 
+  Serial.print("Distancia (cm): "); 
   Serial.println(distance); 
 }
 
 // Funcao para teste do modulo Led RGB 
-void teste_led_ldr() {         // A verificar... 
-  valor_ldr = analogRead(ldr_sensor);
-  Serial.print("Valor lido pelo LDR = "); 
-  Serial.println(valor_ldr); 
+int teste_ldr() {                       // A verificar... 
+  valor_ldr = analogRead(ldr_sensor);   // Faixa de valores: 0 a 1023 
+  return valor_ldr; 
 }
 
-// VOID LOOP 
-void loop() {
-  teste_servo(); 
-  //teste_ultrassonico();
-  //teste_led_ldr();
+void teste_moduloLED() {
+  strip1.clear(); 
+  strip2.clear(); 
+  
+  for(int i=0; i<LED_COUNT; i++) {
+    // Set the i-th LED to pure green:
+    strip1.setPixelColor(i, 0, 255, 0);
+    strip2.setPixelColor(i, 0, 255, 0);
+    strip1.show();   
+    strip2.show(); 
+    delay(200); // Pausa antes do novo loop 
+  }
 }
+
+// FUNCAO PRINCIPAL
+void loop() {
+  //teste_ultrassonico();
+  teste_servo(); 
+  if((teste_ldr())<200) teste_moduloLED(); 
+  Serial.println("Distancia (cm): "); 
+}
+
+
