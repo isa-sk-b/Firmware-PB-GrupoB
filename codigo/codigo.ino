@@ -38,6 +38,7 @@
 #define AZUL 0
 #define VERMELHO 1
 #define VERDE 2
+#define BRANCO 4 
 #define maxDistanciaCor 100   // A distancia maxima que atualiza a cor, em cm. 
 #define minDistanceMove 15    // Se a distancia for menor que essa, nao ocorre o movimento. 
 
@@ -109,18 +110,23 @@ void setup()
 void Task1code( void * pvParameters ){
   while(true){
   int tempo = 50; 
-  detectaDistancia(); 
-  detectaLuz();  
+  //detectaDistancia(); 
+  //detectaLuz();  
+  vTaskDelay(100);
   vTaskDelay(tempo / portTICK_PERIOD_MS);   // Suspender a task por um intervalo de tempo para 
   /* Isso permite que o EspWatchdog retorne o controle para a Esp32 */
+
+  bateGarras(6);
   }
 }
 
 
 //Task2code: Controla o andar do robô
+/* Proposta de solucao: Separar o processamento dos servos maiores do dos servos menores */
 void Task2code( void * pvParameters ) {
   while(true){
-    int tempo = 50; 
+    int tempo = 50;
+    moveServosMaiores();
     vTaskDelay(tempo / portTICK_PERIOD_MS);
   }
 }
@@ -271,53 +277,57 @@ void oscilaLados(int qtdeOscilacoes) {
 }
 
 // Move os servos (funcao teste de movimento)
-void moveServos() {
+void moveServosMaiores() {
   int tempo = 100; 
 
-  if((distanceDetectedCm>=minDistanceMove) && (MovEnable==1))  {
   servo[QUADDIR].write(0);
   vTaskDelay(tempo / portTICK_PERIOD_MS);
   servo[PEDIR].write(0);
   vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[QUADESQ].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[PEESQ].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[GARRADIR].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[GARRAESQ].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  }
+  //servo[QUADESQ].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[PEESQ].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRADIR].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRAESQ].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
 
-  if((distanceDetectedCm>=minDistanceMove) && (MovEnable==1))  { 
+
+  // 21 e 22
+  // quadril esquerda e pe esquerda  
+
   servo[QUADDIR].write(90);
   vTaskDelay(tempo / portTICK_PERIOD_MS);
   servo[PEDIR].write(90);
   vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[QUADESQ].write(90);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[PEESQ].write(90);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRADIR].write(90);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRAESQ].write(90); 
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+
+  vTaskDelay(2000); 
+  
+  // PARTE 2 
+  servo[QUADESQ].write(0);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  servo[PEESQ].write(0);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+
   servo[QUADESQ].write(90);
   vTaskDelay(tempo / portTICK_PERIOD_MS);
   servo[PEESQ].write(90);
   vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[GARRADIR].write(90);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[GARRAESQ].write(90); 
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  }
 
-  if((distanceDetectedCm>=minDistanceMove) && (MovEnable==1))  {
-  servo[QUADDIR].write(180);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[PEDIR].write(180);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[QUADESQ].write(180);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[PEESQ].write(180);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[GARRADIR].write(180);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[GARRAESQ].write(180); 
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  }
+  //servo[GARRADIR].write(180);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRAESQ].write(180); 
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  
 }
 
 // FUNCOES DE SENSORES: 
@@ -407,6 +417,11 @@ void setCor(int corLigar) {
       cores[1] = 0;
       cores[2] = 255;
     break; 
+    case BRANCO: 
+      cores[0] = 255;
+      cores[1] = 255;
+      cores[2] = 255;
+    break; 
     default:
       cores[0] = 0; 
       cores[1] = 0;
@@ -417,6 +432,8 @@ void setCor(int corLigar) {
   for(int i=0; i<NUM_PIXELS; i++) {
     ws2812bONE.setPixelColor(i, ws2812bONE.Color(cores[0],cores[1],cores[2]));  
     ws2812bTWO.setPixelColor(i, ws2812bTWO.Color(cores[0],cores[1],cores[2]));  
+    ws2812bONE.show(); 
+    ws2812bTWO.show(); 
   }
 }
 
