@@ -107,16 +107,17 @@ void setup()
 
 // Task1code: Controla os sensores e os leds
 // Codigo para as funcoes que usam menos delay 
+/* A separacao usada para esse codigo nao e a adotada no projeto. */
 void Task1code( void * pvParameters ){
   while(true){
   int tempo = 50; 
-  //detectaDistancia(); 
-  //detectaLuz();  
+  /* Deteccao da leitura dos sensores */ 
+  detectaDistancia(); 
+  detectaLuz();  
+
   vTaskDelay(100);
   vTaskDelay(tempo / portTICK_PERIOD_MS);   // Suspender a task por um intervalo de tempo para 
   /* Isso permite que o EspWatchdog retorne o controle para a Esp32 */
-
-  bateGarras(6);
   }
 }
 
@@ -125,21 +126,24 @@ void Task1code( void * pvParameters ){
 /* Proposta de solucao: Separar o processamento dos servos maiores do dos servos menores */
 void Task2code( void * pvParameters ) {
   while(true){
-    int tempo = 50;
-    moveServosMaiores();
-    vTaskDelay(tempo / portTICK_PERIOD_MS);
+  int tempo = 50;
+  bateGarras(6);
+  setPosicaoPadrao();       
+  DaUmPassoFrente(); 
+
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
   }
 }
 
 void loop(){}
 
-// FUNCOES: 
 
-// FUNCOES DO SERVOMOTOR: 
+// --------------------------------------------------- ################# FUNCOES DO SERVOMOTOR: #################### ----------------------------------------------------------------
 // Coloca as posicoes padroes dos servos (ou qualquer posicao)
+/* Aparentemente, a posicao padrao do quadril ou do pe da direita e diferente da posicao padrao. Mas o resto e igual. */
 void setPosicaoPadrao(){
+  int print = 0;                // Variavel que indica se printa ou nao no monitor serial (Tomar cuidado para nao haver requisicoes do monitor serial ao mesmo tempo)
   int tempo = 100; 
-  int print = 1;      // Variavel que indica se printa ou nao no monitor serial (Tomar cuidado para nao haver requisicoes do monitor serial ao mesmo tempo)
   int posicao[6];
   
   posicao[PEDIR] = 90; 
@@ -154,21 +158,21 @@ void setPosicaoPadrao(){
     Serial.println(posicao[PEDIR]); 
   }
   servo[PEDIR].write(posicao[PEDIR]);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  vTaskDelay(tempo);
 
   if(print) {
     Serial.print("Setando posicao no servo Pe Esquerda..."); 
     Serial.println(posicao[PEESQ]);
   }
   servo[PEESQ].write(posicao[PEESQ]);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  vTaskDelay(tempo);
 
   if(print) {
     Serial.print("Setando posicao no servo Quadril Direita..."); 
     Serial.println(posicao[QUADDIR]); 
   }
   servo[QUADDIR].write(posicao[QUADDIR]);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  vTaskDelay(tempo);
 
   if(print) {
     Serial.print("Setando posicao no servo Quadril Esquerda...");  
@@ -194,6 +198,7 @@ void setPosicaoPadrao(){
 
 // Bate as garras por uma certa quantidade de vezes fornecida 
 // O angulo maximo a qual as garras devem atingir nao deve gerar o choque das garras, Assim como o angulo minimo nao pode gerar distensao (choque dentro das garras)
+// VER COM A MARIA EDUARDA OS ANGULOS DA SIMULACAO 
 void bateGarras(int qtdeVezes) {
   int tempo = 10;       // O tempo entre as iteracoes do loop 
   int pos_garra_esq;
@@ -276,61 +281,104 @@ void oscilaLados(int qtdeOscilacoes) {
     }
 }
 
-// Move os servos (funcao teste de movimento)
-void moveServosMaiores() {
-  int tempo = 100; 
+// Da um passo para algum lado 
+// ESSA FUNCAO TEM COMO FONTE O MODO "MOONWALK" DO VIDEO https://www.youtube.com/watch?v=VD6sgTo6NOY
+void DaUmPassoLado(int side) {
+    // Setar os servos para posicao de espera 
+    servo[PEDIR].write(wait_pos_feet); 
+    servo[PEESQ].write(wait_pos_feet); 
 
-  servo[QUADDIR].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[PEDIR].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[QUADESQ].write(0);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[PEESQ].write(0);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[GARRADIR].write(0);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[GARRAESQ].write(0);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-
-
-  // 21 e 22
-  // quadril esquerda e pe esquerda  
-
-  servo[QUADDIR].write(90);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[PEDIR].write(90);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[QUADESQ].write(90);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[PEESQ].write(90);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[GARRADIR].write(90);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[GARRAESQ].write(90); 
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-
-  vTaskDelay(2000); 
-  
-  // PARTE 2 
-  servo[QUADESQ].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[PEESQ].write(0);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-
-  servo[QUADESQ].write(90);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-  servo[PEESQ].write(90);
-  vTaskDelay(tempo / portTICK_PERIOD_MS);
-
-  //servo[GARRADIR].write(180);
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  //servo[GARRAESQ].write(180); 
-  //vTaskDelay(tempo / portTICK_PERIOD_MS);
-  
+    // Variaveis para regular o movimento dos servos
+    int tempo = 10; 
+    
+    // Movimento ocorre com o pe do lado para o qual esta direcionado o movimento se 
+    
+    vTaskDelay(tempo / portTICK_PERIOD_MS);
 }
 
-// FUNCOES DE SENSORES: 
+/*
+--------- ###### OBSERVACOES SOBRE ESSA FUNCAO ######### ------------- 
+- O movimento dos pes esta sincronizado 
+- Os quadris se movem em direcoes opostas de varredura de angulo
+- Mas os quadris estao "alinhados" pelo diametro, apresentam a mesma diferenca de angulo em relacao a posicao em que o servo esta parado. 
+OBS: Essa funcao pode usar apenas dois servomotores simultaneamente, no maximo. 
+*/
+void DaUmPassoFrente() {
+  // PENSAR EM SETAR AS POSICOES MINIMAS COMO A POSICAO PADRAO -> PRECISA FAZER ISSO 
+  /* Valores ja definidos */ 
+  int intervalo = 100;       /* Intervalo de tempo entre os passos */
+  int pos_max_quadris = 110;    /* A posicao minima deve ser a posicao padrao */
+  int pos_min_quadris = 70;
+  int pos_max_pes = 110;
+  int pos_min_pes = 70;
+  int incremento_pe = 10;
+  int incremento_quad = 10; 
+  int qtde_iteracoes = 5;
+
+  /* Valores calculados a partir das variaveis definidas */
+  int pos_cur_pedir = pos_min_pes;  
+  int pos_cur_quaddir = pos_min_quadris; 
+  int pos_cur_peesq = pos_min_pes;
+  int pos_cur_quadesq = pos_min_quadris;
+  int incrementope = (pos_max_pes - pos_min_pes)/qtde_iteracoes;
+  int incrementoquad = (pos_max_quadris - pos_min_quadris)/qtde_iteracoes;
+
+  /* Movimento da parte direita */
+  /* Movimento ascendente do pe e movimentacao do quadril */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEDIR].write(pos_cur_pedir);
+    servo[QUADDIR].write(pos_cur_quaddir);
+    pos_cur_pedir += incrementope; 
+    pos_cur_quaddir += incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEDIR].write(pos_max_pes); 
+  servo[QUADDIR].write(pos_max_quadris);
+
+  /* Movimento descedente do pe */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEDIR].write(pos_cur_pedir);
+    servo[QUADDIR].write(pos_cur_quaddir);
+    pos_cur_pedir -= incrementope; 
+    pos_cur_quaddir -= incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEDIR].write(pos_min_pes); 
+  servo[QUADDIR].write(pos_min_quadris);
+
+  vTaskDelay(500);
+  Serial.println("Saindo do primeiro loop e entrando no segundo..."); 
+
+  /* Movimento da parte esquerda */
+  /* Movimento ascendente do pe */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEESQ].write(pos_cur_peesq);
+    servo[QUADESQ].write(pos_cur_quadesq);
+    pos_cur_peesq += incrementope; 
+    pos_cur_quadesq += incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEESQ].write(pos_max_pes); 
+  servo[QUADESQ].write(pos_max_quadris); 
+
+  /* Movimento decrescente do pe */
+    for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEESQ].write(pos_cur_peesq);
+    servo[QUADESQ].write(pos_cur_quadesq);
+    pos_cur_peesq -= incrementope; 
+    pos_cur_quadesq -= incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEESQ].write(pos_min_pes); 
+  servo[QUADESQ].write(pos_min_quadris); 
+
+  Serial.println("Segundo loop terminado."); 
+}
+
+
+
+
+// -------------------------------------- ################## FUNCOES DE SENSORES ################### ------------------------------------------
 void detectaDistancia() {
   int duration; 
   int print = 1; 
@@ -355,7 +403,7 @@ void detectaLuz() {
     Serial.print("Luminosidade detectada: ");
     Serial.println(luminosidade);
   } 
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10);
 }
 
 // FUNCOES DO MODULO LED:
@@ -437,73 +485,80 @@ void setCor(int corLigar) {
   }
 }
 
-// 2. CODIGOS PRONTOS E TESTADOS: 
-// Atualiza os modulos LEDs para a cor que foi detectada pela camera 
-/*
-void atualizarLEDS(){
-  switch (cor){
-    case NADA:
-      ws2812bONE.clear();
-      ws2812bTWO.clear();
-      ws2812bONE.show();
-      ws2812bTWO.show();
-      break;
-    case AZUL:
-      if(distanceDetectedCm<=maxDistanciaCor) {
-        nh.loginfo("Setando LED azul");
-        for(int i=0;i<NUM_PIXELS;i++) {
-          ws2812bONE.setPixelColor(i, ws2812bONE.Color(0,0,255));  
-          ws2812bTWO.setPixelColor(i, ws2812bONE.Color(0,0,255));  
-          ws2812bONE.show();
-          ws2812bTWO.show();
-        }
-      }
-      break;
-    case VERMELHO:
-      if(distanceDetectedCm<=maxDistanciaCor) {
-      nh.loginfo("Setando LED vermelho");
-        for(int i=0;i<NUM_PIXELS;i++) {
-          ws2812bONE.setPixelColor(i, ws2812bONE.Color(255,0,0));  
-          ws2812bONE.show();
-          ws2812bTWO.show();
-        }
-      }
-      break;
-    case VERDE:
-    if(distanceDetectedCm<=maxDistanciaCor) {
-      nh.loginfo("Setando LED verde");
-      for(int i=0;i<NUM_PIXELS;i++) {
-        ws2812bONE.setPixelColor(i, ws2812bONE.Color(0,255,0));  
-        ws2812bONE.show();
-        ws2812bTWO.show();
-      }
+
+
+
+
+// ---------------------------------------------------- ######  FUNCOES MODULARES (REALIZACAO DE TAREFAS BEM PEQUENAS) ###### ------------------------------------------
+void moveServoSuavemente(int *ServosMovidos, int pos_inicial, int pos_final, int tempo, int incremento) {
+  int qtde_iteracoes = abs((pos_final - pos_inicial)/incremento); 
+  int wait = tempo/qtde_iteracoes;
+  int pos_servomotor = pos_inicial; 
+  int qtde_servos = sizeof(ServosMovidos)/sizeof(int);    /* Para percorrer o vetor de servos a serem movidos (simultaneamente) -> usar sizeof para determinar tamanho */
+  
+  for(int i=0; i<qtde_iteracoes; i++) {
+    for(int j=0; j<qtde_servos ;j++) {
+      servo[ServosMovidos[j]].write(pos_servomotor); 
+      vTaskDelay(wait); 
     }
-      break;
-    default:
-      ws2812bTWO.clear();
-      ws2812bONE.clear();
-      ws2812bONE.show();
-      ws2812bTWO.show();
-      break;
+    pos_servomotor += incremento; 
   }
-}*/
+}
 
-// Da uma certa quantidade de passos para o lado 
-void moveLado(int side, int qtdePassos) {
-    // Setar os servos para posicao de espera 
-    servo[PEDIR].write(wait_pos_feet); 
-    servo[PEESQ].write(wait_pos_feet); 
 
-    // Variaveis para regular o movimento dos servos
-    int tempo = 10; 
-    
-    // Movimento ocorre com o pe do lado para o qual esta direcionado o movimento se 
-    // Para que ele se movimente de lado, 
-    //if(side==DIREITA) servo[].write(40)
-    //else servo[].write(140); 
-    //delay(tempo/2); 
 
-    //servo[].write(); 
-    //servo[].write(); 
-    vTaskDelay(tempo / portTICK_PERIOD_MS);
+
+// -------------------------------------------------------- ######  FUNCOES PARA TESTE   ###### -------------------------------------------------------------------------
+// Move os servos (funcao teste de movimento)
+void moveServosMaiores() {
+  int tempo = 100; 
+
+  servo[QUADDIR].write(0);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  servo[PEDIR].write(0);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[QUADESQ].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[PEESQ].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRADIR].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRAESQ].write(0);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+
+
+  // 21 e 22
+  // quadril esquerda e pe esquerda  
+
+  servo[QUADDIR].write(90);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  servo[PEDIR].write(90);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[QUADESQ].write(90);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[PEESQ].write(90);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRADIR].write(90);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRAESQ].write(90); 
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+
+  vTaskDelay(2000); 
+  
+  // PARTE 2 
+  servo[QUADESQ].write(0);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  servo[PEESQ].write(0);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+
+  servo[QUADESQ].write(90);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+  servo[PEESQ].write(90);
+  vTaskDelay(tempo / portTICK_PERIOD_MS);
+
+  //servo[GARRADIR].write(180);
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  //servo[GARRAESQ].write(180); 
+  //vTaskDelay(tempo / portTICK_PERIOD_MS);
+  
 }
