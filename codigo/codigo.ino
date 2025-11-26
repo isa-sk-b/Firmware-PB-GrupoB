@@ -31,7 +31,7 @@
 #define PEESQ       3
 #define GARRADIR    4
 #define GARRAESQ    5
-
+ 
 // VARIAVEIS 
 // MODULO LED 
 #define NADA -1
@@ -48,8 +48,8 @@ Adafruit_NeoPixel ws2812bTWO(NUM_PIXELS, PIN_WS2812BTWO, NEO_GRB + NEO_KHZ800);
 // CONSTANTES GERAIS 
 #define SOUND_SPEED 0.034
 #define BAUD_RATE 115200
-#define ESQ 0
-#define DIR 1 
+#define ESQUERDA 0
+#define DIREITA 1 
 
 // VARIAVEIS PARA REGULAR OS SERVOS
 Servo servo[6]; 
@@ -127,8 +127,7 @@ void Task1code( void * pvParameters ){
 void Task2code( void * pvParameters ) {
   while(true){
   int tempo = 50;
-  bateGarras(6);
-  setPosicaoPadrao();       
+  setPosicaoPadrao(); 
   DaUmPassoFrente(); 
 
   vTaskDelay(tempo / portTICK_PERIOD_MS);
@@ -283,20 +282,68 @@ void oscilaLados(int qtdeOscilacoes) {
 
 // Da um passo para algum lado 
 // ESSA FUNCAO TEM COMO FONTE O MODO "MOONWALK" DO VIDEO https://www.youtube.com/watch?v=VD6sgTo6NOY
-void DaUmPassoLado(int side) {
-    // Setar os servos para posicao de espera 
-    servo[PEDIR].write(wait_pos_feet); 
-    servo[PEESQ].write(wait_pos_feet); 
+void UmSwing() {
+  // Setar os servos para posicao de espera 
+  servo[PEDIR].write(wait_pos_feet); 
+  servo[PEESQ].write(wait_pos_feet); 
+  
+  /* Valores ja definidos */ 
+  int intervalo = 100;          /* Intervalo de tempo entre os passos */
+  int pos_max_pes = 150;
+  int pos_min_pes = wait_pos_feet; /* A posicao que indica que o pe esta no solo */
+  int qtde_iteracoes = 5;
 
-    // Variaveis para regular o movimento dos servos
-    int tempo = 10; 
-    
-    // Movimento ocorre com o pe do lado para o qual esta direcionado o movimento se 
-    
-    vTaskDelay(tempo / portTICK_PERIOD_MS);
+  /* Valores calculados a partir das variaveis definidas */
+  int pos_cur_pedir = pos_min_pes; 
+  int pos_cur_peesq = pos_min_pes;
+  int incrementope = (pos_max_pes - pos_min_pes)/qtde_iteracoes;
+
+  /* Movimento ascendente do pe direito */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEDIR].write(pos_cur_pedir);
+    pos_cur_pedir += incrementope; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEDIR].write(pos_max_pes);
+
+  /* Movimento descendente do pe direito */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEDIR].write(pos_cur_pedir);
+    pos_cur_pedir -= incrementope; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEDIR].write(pos_min_pes);
+
+  /* Movimento ascendente do pe esquerdo */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEESQ].write(pos_cur_peesq);
+    pos_cur_peesq += incrementope; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEESQ].write(pos_max_pes);
+
+  /* Movimento descendente do pe esquerdo */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEESQ].write(pos_cur_peesq);
+    pos_cur_peesq -= incrementope; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEESQ].write(pos_min_pes);
+
 }
 
-/*
+// ESSA FUNCAO TEM COMO FONTE O MODO "TIPTOE SWING" DO VIDEO https://www.youtube.com/watch?v=VD6sgTo6NOY
+void UmSwingQuadris() {
+  // Setar os servos para posicao de espera 
+  servo[QUADDIR].write(wait_pos_leg); 
+  servo[QUADESQ].write(wait_pos_leg); 
+  
+  /* Movimento ascendente dos quadris */ 
+
+  /* Movimento descendente dos quadris*/
+}
+
+/* ----------------------------------- ######### FUNCAO PRINCIPAL DE ANDAR ########### --------------------------- 
 --------- ###### OBSERVACOES SOBRE ESSA FUNCAO ######### ------------- 
 - O movimento dos pes esta sincronizado 
 - Os quadris se movem em direcoes opostas de varredura de angulo
@@ -306,14 +353,12 @@ OBS: Essa funcao pode usar apenas dois servomotores simultaneamente, no maximo.
 void DaUmPassoFrente() {
   // PENSAR EM SETAR AS POSICOES MINIMAS COMO A POSICAO PADRAO -> PRECISA FAZER ISSO 
   /* Valores ja definidos */ 
-  int intervalo = 100;       /* Intervalo de tempo entre os passos */
+  int intervalo = 100;          /* Intervalo de tempo entre os passos */
   int pos_max_quadris = 110;    /* A posicao minima deve ser a posicao padrao */
   int pos_min_quadris = 70;
-  int pos_max_pes = 110;
-  int pos_min_pes = 70;
-  int incremento_pe = 10;
-  int incremento_quad = 10; 
-  int qtde_iteracoes = 5;
+  int pos_max_pes = 135;
+  int pos_min_pes = wait_pos_feet; /* A posicao que indica que o pe esta no solo */
+  int qtde_iteracoes = 10;
 
   /* Valores calculados a partir das variaveis definidas */
   int pos_cur_pedir = pos_min_pes;  
@@ -324,7 +369,7 @@ void DaUmPassoFrente() {
   int incrementoquad = (pos_max_quadris - pos_min_quadris)/qtde_iteracoes;
 
   /* Movimento da parte direita */
-  /* Movimento ascendente do pe e movimentacao do quadril */
+  /* Movimentacao do quadril e movimento ascendente do pe -> Depois ver se precisa separar esse movimento */
   for(int i=0; i<qtde_iteracoes; i++) {
     servo[PEDIR].write(pos_cur_pedir);
     servo[QUADDIR].write(pos_cur_quaddir);
@@ -338,16 +383,12 @@ void DaUmPassoFrente() {
   /* Movimento descedente do pe */
   for(int i=0; i<qtde_iteracoes; i++) {
     servo[PEDIR].write(pos_cur_pedir);
-    servo[QUADDIR].write(pos_cur_quaddir);
     pos_cur_pedir -= incrementope; 
-    pos_cur_quaddir -= incrementoquad; 
     vTaskDelay(intervalo); 
   }
   servo[PEDIR].write(pos_min_pes); 
-  servo[QUADDIR].write(pos_min_quadris);
 
   vTaskDelay(500);
-  Serial.println("Saindo do primeiro loop e entrando no segundo..."); 
 
   /* Movimento da parte esquerda */
   /* Movimento ascendente do pe */
@@ -371,11 +412,94 @@ void DaUmPassoFrente() {
   }
   servo[PEESQ].write(pos_min_pes); 
   servo[QUADESQ].write(pos_min_quadris); 
-
-  Serial.println("Segundo loop terminado."); 
 }
 
+/* ------------------- FUNCAO DE ANDAR PARA TRAS ------------------------ */
+/*
+IDEIA: Basicamente a funcao de dar passo para a frente, porem os limites sao invertidos. Varia por uma faixa de angulos "inversa" em relacao ao andar para frente. 
+Hipotese: Apenas os angulos do quadril devem se alterar, os angulos dos pes continuam os mesmos. 
+*/
+void DaUmPassoTras() {
+  // PENSAR EM SETAR AS POSICOES MINIMAS COMO A POSICAO PADRAO -> PRECISA FAZER ISSO 
+  /* Valores ja definidos */ 
+  int intervalo = 100;          /* Intervalo de tempo entre os passos */
+  int pos_max_quadris = 70;    /* A posicao minima deve ser a posicao padrao */
+  int pos_min_quadris = 110;
+  int pos_max_pes = 110;
+  int pos_min_pes = wait_pos_feet; /* A posicao que indica que o pe esta no solo */
+  int qtde_iteracoes = 5;
 
+  /* Valores calculados a partir das variaveis definidas */
+  int pos_cur_pedir = pos_min_pes;  
+  int pos_cur_quaddir = pos_min_quadris; 
+  int pos_cur_peesq = pos_min_pes;
+  int pos_cur_quadesq = pos_min_quadris;
+  int incrementope = (pos_max_pes - pos_min_pes)/qtde_iteracoes;
+  int incrementoquad = (pos_max_quadris - pos_min_quadris)/qtde_iteracoes;
+
+  /* Movimento da parte direita */
+  /* Movimentacao do quadril e movimento ascendente do pe -> Depois ver se precisa separar esse movimento */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEDIR].write(pos_cur_pedir);
+    servo[QUADDIR].write(pos_cur_quaddir);
+    pos_cur_pedir += incrementope; 
+    pos_cur_quaddir += incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEDIR].write(pos_max_pes); 
+  servo[QUADDIR].write(pos_max_quadris);
+
+  /* Movimento descedente do pe */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEDIR].write(pos_cur_pedir);
+    pos_cur_pedir -= incrementope; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEDIR].write(pos_min_pes); 
+
+  vTaskDelay(500);
+
+  /* Movimento da parte esquerda */
+  /* Movimento ascendente do pe */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEESQ].write(pos_cur_peesq);
+    servo[QUADESQ].write(pos_cur_quadesq);
+    pos_cur_peesq += incrementope; 
+    pos_cur_quadesq += incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEESQ].write(pos_max_pes); 
+  servo[QUADESQ].write(pos_max_quadris); 
+
+  /* Movimento decrescente do pe */
+    for(int i=0; i<qtde_iteracoes; i++) {
+    servo[PEESQ].write(pos_cur_peesq);
+    servo[QUADESQ].write(pos_cur_quadesq);
+    pos_cur_peesq -= incrementope; 
+    pos_cur_quadesq -= incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[PEESQ].write(pos_min_pes); 
+  servo[QUADESQ].write(pos_min_quadris); 
+}
+
+/* ------------------ FUNCAO DE DESVIAR PARA UM LADO ---------------------- */
+/* 
+Desvia para o lado especificado em 90 graus. Apos isso precisaria realizar a verificacao antes de iniciar o andar. 
+Video de referencia: https://www.youtube.com/watch?v=VD6sgTo6NOY      - Minuto a
+
+*/
+void DesviaUmLado(int side) {
+  switch(side) {
+    case DIREITA: 
+
+
+
+    break; 
+    case ESQUERDA: 
+    break; 
+  }
+}
 
 
 // -------------------------------------- ################## FUNCOES DE SENSORES ################### ------------------------------------------
@@ -406,7 +530,9 @@ void detectaLuz() {
   vTaskDelay(10);
 }
 
-// FUNCOES DO MODULO LED:
+
+
+// -------------------------------------- ################## FUNCOES DO MODULO LED ################### ------------------------------------------
 void modoBalada() {
   ws2812bONE.clear(); 
   ws2812bTWO.clear(); 
@@ -488,7 +614,6 @@ void setCor(int corLigar) {
 
 
 
-
 // ---------------------------------------------------- ######  FUNCOES MODULARES (REALIZACAO DE TAREFAS BEM PEQUENAS) ###### ------------------------------------------
 void moveServoSuavemente(int *ServosMovidos, int pos_inicial, int pos_final, int tempo, int incremento) {
   int qtde_iteracoes = abs((pos_final - pos_inicial)/incremento); 
@@ -561,4 +686,31 @@ void moveServosMaiores() {
   //servo[GARRAESQ].write(180); 
   //vTaskDelay(tempo / portTICK_PERIOD_MS);
   
+}
+
+void moveServosParaMaiorAngulo() {
+  int pos_cur_pes = 90; 
+  int pos_cur_quadris = 90; 
+  int pos_cur_garras = 90; 
+  int tempo = 100; 
+  int qtde_iteracoes = 10; 
+  int incremento = (180 - pos_cur_pes)/qtde_iteracoes; 
+
+  for(int i=0; i<qtde_iteracoes; i++) {
+  servo[PEESQ].write(pos_cur_pes); 
+  vTaskDelay(tempo);
+  servo[QUADESQ].write(pos_cur_quadris); 
+  vTaskDelay(tempo);
+  servo[PEDIR].write(pos_cur_pes); 
+  vTaskDelay(tempo);
+  servo[QUADDIR].write(pos_cur_quadris); 
+  vTaskDelay(tempo);
+  servo[GARRADIR].write(pos_cur_garras);
+  vTaskDelay(tempo);
+  servo[GARRAESQ].write(pos_cur_garras); 
+  vTaskDelay(tempo);
+  pos_cur_pes += incremento;
+  pos_cur_garras += incremento;
+  pos_cur_quadris += incremento;
+  }
 }
