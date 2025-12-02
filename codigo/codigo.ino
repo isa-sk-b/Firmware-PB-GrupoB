@@ -78,7 +78,7 @@ TaskHandle_t Task1;
 TaskHandle_t Task2;
 
 void setup()
-{ 
+{   
   Serial.begin(9600); 
   // Inicializa componentes
   ws2812bONE.begin();
@@ -127,12 +127,13 @@ void Task1code( void * pvParameters ){
 void Task2code( void * pvParameters ) {
   while(true){
   int tempo = 50;
-  setPosicaoPadrao(); 
   DaUmPassoFrente(); 
+  
 
   vTaskDelay(tempo / portTICK_PERIOD_MS);
   }
 }
+//  setPosicaoPadrao(); 
 
 void loop(){}
 
@@ -349,6 +350,7 @@ void UmSwingQuadris() {
 - Os quadris se movem em direcoes opostas de varredura de angulo
 - Mas os quadris estao "alinhados" pelo diametro, apresentam a mesma diferenca de angulo em relacao a posicao em que o servo esta parado. 
 OBS: Essa funcao pode usar apenas dois servomotores simultaneamente, no maximo. 
+NAO FAZER NENHUM MOVIMENTO BRUSCO! 
 */
 void DaUmPassoFrente() {
   // PENSAR EM SETAR AS POSICOES MINIMAS COMO A POSICAO PADRAO -> PRECISA FAZER ISSO 
@@ -356,7 +358,7 @@ void DaUmPassoFrente() {
   int intervalo = 100;          /* Intervalo de tempo entre os passos */
   int pos_max_quadris = 110;    /* A posicao minima deve ser a posicao padrao */
   int pos_min_quadris = 70;
-  int pos_max_pes = 135;
+  int pos_max_pes = 50;
   int pos_min_pes = wait_pos_feet; /* A posicao que indica que o pe esta no solo */
   int qtde_iteracoes = 10;
 
@@ -368,7 +370,16 @@ void DaUmPassoFrente() {
   int incrementope = (pos_max_pes - pos_min_pes)/qtde_iteracoes;
   int incrementoquad = (pos_max_quadris - pos_min_quadris)/qtde_iteracoes;
 
-  /* Movimento da parte direita */
+  /* ----------------------------------------- MOVIMENTO DA PARTE DIREITA ------------------------------------------ */
+  /* Retorna o quadril esquerdo a posicao original */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[QUADESQ].write(pos_cur_quadesq);
+    pos_cur_quadesq -= incrementoquad; 
+    //if(pos_cur_quadesq<=pos_min_quadris) break;
+    vTaskDelay(intervalo); 
+  }
+  servo[QUADESQ].write(pos_min_quadris);
+
   /* Movimentacao do quadril e movimento ascendente do pe -> Depois ver se precisa separar esse movimento */
   for(int i=0; i<qtde_iteracoes; i++) {
     servo[PEDIR].write(pos_cur_pedir);
@@ -390,8 +401,8 @@ void DaUmPassoFrente() {
 
   vTaskDelay(500);
 
-  /* Movimento da parte esquerda */
-  /* Movimento ascendente do pe */
+  /* ----------------------------------------------- MOVIMENTO DA PARTE ESQUERDA ------------------------------------------------- */
+  /* Movimento ascendente do pe e do quadril */
   for(int i=0; i<qtde_iteracoes; i++) {
     servo[PEESQ].write(pos_cur_peesq);
     servo[QUADESQ].write(pos_cur_quadesq);
@@ -402,17 +413,37 @@ void DaUmPassoFrente() {
   servo[PEESQ].write(pos_max_pes); 
   servo[QUADESQ].write(pos_max_quadris); 
 
-  /* Movimento decrescente do pe */
-    for(int i=0; i<qtde_iteracoes; i++) {
+  /* Movimento descendente do pe */
+  for(int i=0; i<qtde_iteracoes; i++) {
     servo[PEESQ].write(pos_cur_peesq);
-    servo[QUADESQ].write(pos_cur_quadesq);
     pos_cur_peesq -= incrementope; 
-    pos_cur_quadesq -= incrementoquad; 
     vTaskDelay(intervalo); 
   }
   servo[PEESQ].write(pos_min_pes); 
-  servo[QUADESQ].write(pos_min_quadris); 
+
+  /* Retorna o quadril direito a posicao original */
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[QUADDIR].write(pos_cur_quaddir);
+    pos_cur_quaddir -= incrementoquad; 
+    //if(pos_cur_quaddir<=pos_min_quadris) break; 
+    vTaskDelay(intervalo); 
+  }
+  servo[QUADDIR].write(pos_min_quadris);
 }
+
+/* Funcoes auxiliares para o andar principal: 
+  // Retorna o quadril direito a posicao original 
+  for(int i=0; i<qtde_iteracoes; i++) {
+    servo[QUADDIR].write(pos_cur_quaddir);
+    pos_cur_quaddir -= incrementoquad; 
+    vTaskDelay(intervalo); 
+  }
+  servo[QUADDIR].write(pos_min_quadris);
+
+
+
+*/
+
 
 /* ------------------- FUNCAO DE ANDAR PARA TRAS ------------------------ */
 /*
