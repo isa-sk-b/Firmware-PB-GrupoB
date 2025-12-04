@@ -70,7 +70,8 @@ volatile bool andando = false;
 int pos_cur_pedir;  
 int pos_cur_quaddir; 
 int pos_cur_peesq;
-int pos_cur_quadesq;     
+int pos_cur_quadesq; 
+int print = 0;                // Variavel que indica se printa ou nao no monitor serial (Tomar cuidado para nao haver requisicoes do monitor serial ao mesmo tempo)    
 /*
 Logica para andando: 
 - Quando ja estiver andando e for dado o comando de andar, nao reseta o andar. 
@@ -145,7 +146,6 @@ void loop(){}
 // Coloca as posicoes padroes dos servos (ou qualquer posicao)
 /* Aparentemente, a posicao padrao do quadril ou do pe da direita e diferente da posicao padrao. Mas o resto e igual. */
 void setPosicaoPadrao(){
-  int print = 0;                // Variavel que indica se printa ou nao no monitor serial (Tomar cuidado para nao haver requisicoes do monitor serial ao mesmo tempo)
   int tempo = 100; 
   int posicao[6];
   
@@ -454,6 +454,8 @@ void DesviaUmLado(int side) {
   }
 }
 
+/* ------------------------------- ####################### FUNCOES MODULARES PARA MEXER OS SERVOS ##################### --------------------------------------- */
+
 // Move o servo suavemente de uma posicao para outra. OBS: NAO ATUALIZA A POSICAO, ELA PRECISA SER ATUALIZADA NA FUNCAO EM QUE E CHAMADA. 
 void moveUmServoSuavemente(int s, int pos_inicial, int pos_final, int qtde_iteracoes) {
   int incremento = (pos_final - pos_inicial)/qtde_iteracoes; 
@@ -471,7 +473,6 @@ void moveUmServoSuavemente(int s, int pos_inicial, int pos_final, int qtde_itera
 // -------------------------------------- ################## FUNCOES DE SENSORES ################### ------------------------------------------
 void detectaDistancia() {
   int duration; 
-  int print = 1; 
   digitalWrite(trigPin, LOW);
   vTaskDelay(2);
   digitalWrite(trigPin, HIGH);
@@ -487,7 +488,6 @@ void detectaDistancia() {
 }
 
 void detectaLuz() {
-  int print = 1; 
   luminosidade = analogRead(ldr);
   if(print) {
     Serial.print("Luminosidade detectada: ");
